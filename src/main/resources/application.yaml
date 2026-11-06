@@ -1,3 +1,11 @@
 spring:
   application:
     name: blog
+  datasource:
+    url: jdbc:postgresql://localhost:5432/appdb
+    username: ${DB_USER:app}
+    password: ${DB_PASSWORD:secret}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
