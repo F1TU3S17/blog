@@ -16,9 +16,9 @@ CREATE TABLE users (
         AND email !~ '\.\.'
     ),
 
-    role VARCHAR(20) NOT NULL DEFAULT 'ROLE_USER'
+    role VARCHAR(20) NOT NULL DEFAULT 'USER'
     CONSTRAINT chk_user_role
-    CHECK (role IN ('ROLE_USER', 'ROLE_ADMIN'))
+    CHECK (role IN ('USER', 'ADMIN'))
 );
 
 CREATE TABLE posts (

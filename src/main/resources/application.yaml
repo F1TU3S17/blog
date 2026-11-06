@@ -9,3 +9,14 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+
+  session:
+    timeout: 30m
+    jdbc:
+      initialize-schema: always
+      table-name: SPRING_SESSION
+
+server:
+  servlet:
+      cookie:
+        http-only: true
