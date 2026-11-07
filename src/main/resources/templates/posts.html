@@ -7,14 +7,14 @@
 </head>
 <body>
 
-<div>
+<div th:if="${user != null}">
     <h1>Профиль</h1>
     <p th:text="${user.username}">Имя пользователя</p>
     <p th:text="${user.id}">ID</p>
-</div>
-
-<div>
     <a th:href="@{/posts/create}"> Создать пост </a>
+    <form th:action="@{/auth/logout}" method="post">
+        <button type="submit">Выйти из аккаунта</button>
+    </form>
 </div>
 
 <hr>

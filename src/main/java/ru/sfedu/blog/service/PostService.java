@@ -51,7 +51,7 @@ public class PostService {
         }
 
         if (request.content() != null && !request.content().isEmpty()) {
-            post.setTitle(request.content());
+            post.setContent(request.content());
         }
 
         post.toDto();

@@ -73,17 +73,21 @@
         Содержимое поста
     </div>
 
-    <!-- Доступно только автору -->
     <div class="actions"
-         th:if="${user != null and user.id == post.author.id}">
+         th:if="${user != null}">
 
-        <button type="button" onclick="showEditForm()">
+        <button type="button"
+                th:if="${user.id == post.author.id}"
+                onclick="showEditForm()">
             Редактировать
         </button>
 
-        <button type="button" onclick="deletePost()">
+        <button type="button"
+                th:if="${user.id == post.author.id or user.hasRole(T(ru.sfedu.blog.entity.UserRoleEnum).ADMIN)}"
+                onclick="deletePost()">
             Удалить
         </button>
+
     </div>
 </article>
 
@@ -97,7 +101,6 @@
     <form th:action="@{/posts/{id}(id=${post.id})}"
           method="post">
 
-        <!-- POST преобразуется в PUT -->
         <input type="hidden" name="_method" value="PUT">
 
         <label for="title">Заголовок</label>

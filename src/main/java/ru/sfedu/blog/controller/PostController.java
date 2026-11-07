@@ -71,7 +71,7 @@ public class PostController {
         return "redirect:/posts";
     }
 
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     public String updatePost(
             @ModelAttribute PostUpdateRequest postUpdateRequest,
             @AuthenticationPrincipal CustomUserDetails user,
