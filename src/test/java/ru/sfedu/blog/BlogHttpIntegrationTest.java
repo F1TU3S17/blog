@@ -53,6 +53,18 @@ class BlogHttpIntegrationTest {
     }
 
     @Test
+    void register_invalidInput_showsFieldErrorsAndRetainsSafeValues() throws Exception {
+        TestResponse response = new Browser().register("bad@name", "invalid", "");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Начните с буквы"));
+        assertTrue(response.body().contains("Введите корректный email"));
+        assertTrue(response.body().contains("value=\"bad@name\""));
+        assertTrue(response.body().contains("value=\"invalid\""));
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM users", Integer.class));
+    }
+
+    @Test
     void register_formData_persistsUserWithHashedPasswordAndAuthenticatesSession() throws Exception {
         Browser browser = new Browser();
         TestResponse response = browser.register("alice", "alice@example.com", "secret123");

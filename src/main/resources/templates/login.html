@@ -17,10 +17,16 @@
 <form th:action="@{/auth/login}" method="post">
 
     <label for="loginInput">Имя пользователя или email</label>
-    <input id="loginInput" type="text" name="loginInput" required>
+    <input id="loginInput" type="text" name="loginInput" required th:value="${loginRequest?.loginInput}">
+    <div th:if="${loginRequest != null}" th:object="${loginRequest}">
+        <p class="field-error" th:if="${#fields.hasErrors('loginInput')}" th:errors="*{loginInput}" role="alert"></p>
+    </div>
 
     <label for="password">Пароль</label>
     <input id="password" type="password" name="password" required>
+    <div th:if="${loginRequest != null}" th:object="${loginRequest}">
+        <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}" role="alert"></p>
+    </div>
 
     <button type="submit">Войти <span aria-hidden="true">↗</span></button>
 

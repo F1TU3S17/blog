@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,9 +34,13 @@ public class AuthController {
     @PostMapping("/register")
     public String register(
         @Valid @ModelAttribute RegisterRequest registerRequest,
+        BindingResult bindingResult,
         HttpServletRequest request,
         HttpServletResponse response
     ) {
+        if (bindingResult.hasErrors()) {
+            return "register";
+        }
         UserDetails userDetails = userService.registerUser(registerRequest);
 
         sessionService.authenticateSession(userDetails, request, response);
@@ -51,9 +56,13 @@ public class AuthController {
     @PostMapping("/login")
     public String login(
         @Valid @ModelAttribute LoginRequest loginRequest,
+        BindingResult bindingResult,
         HttpServletRequest request,
         HttpServletResponse response
     ) {
+        if (bindingResult.hasErrors()) {
+            return "login";
+        }
         UserDetails userDetails = userService.loginUser(loginRequest);
 
         sessionService.authenticateSession(userDetails, request, response);

@@ -7,7 +7,7 @@
     --brand-mark: #9fc5d3; --brand-dot: #80b3c8; --heading: #26343b;
     --description: #63737c; --button-hover: #467f9a; --button-text: #fff;
     --footer-brand: #3d505b; --input-border: #c9d3d8;
-    --post-heading: #2d414c; --surface-hover: #f1f6f8;
+    --post-heading: #2d414c; --surface-hover: #f1f6f8; --error: #b42318;
 }
 
 [data-theme="dark"] {
@@ -19,5 +19,5 @@
     --brand-mark: #9fc5d3; --brand-dot: #80b3c8; --heading: #eef3f5;
     --description: #b0bec5; --button-hover: #669bb4; --button-text: #14232b;
     --footer-brand: #d3dfe4; --input-border: #52636b;
-    --post-heading: #e1eaee; --surface-hover: #303e45;
+    --post-heading: #e1eaee; --surface-hover: #303e45; --error: #ff9e94;
 }

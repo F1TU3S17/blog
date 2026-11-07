@@ -35,4 +35,12 @@ public class UserRepositoryImplt {
             return new AppException(AppErrorEnum.USER_NOT_FOUND);
         });
     }
+
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
 }

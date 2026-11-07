@@ -16,7 +16,7 @@
 <form th:action="@{/posts}" method="post">
 
     <label for="title">Название</label>
-    <input id="title" type="text" name="title" required>
+    <input id="title" type="text" name="title" required minlength="3" maxlength="100">
 
     <label for="content">Содержание</label>
     <textarea id="content" name="content" required></textarea>

@@ -11,7 +11,9 @@ public enum AppErrorEnum implements AppError {
     USER_PASSWORD_INCORRECT(2, HttpStatus.BAD_REQUEST, "User entered an incorrect password"),
     POST_NOT_FOUND(3, HttpStatus.NOT_FOUND, "Post not found"),
     USER_CANT_EDIT_POST(4, HttpStatus.FORBIDDEN, "User can`t edit current post"),
-    USER_CANT_DELETE_POST(5, HttpStatus.FORBIDDEN, "User can`t delete post");
+    USER_CANT_DELETE_POST(5, HttpStatus.FORBIDDEN, "User can`t delete post"),
+    USERNAME_ALREADY_EXISTS(6, HttpStatus.CONFLICT, "Username already exists"),
+    EMAIL_ALREADY_EXISTS(7, HttpStatus.CONFLICT, "Email already exists");
 
     private final int code;
     private final HttpStatus status;

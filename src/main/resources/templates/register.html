@@ -14,23 +14,37 @@
 <h1>Начнём с вас<span class="brand-dot">.</span></h1>
 <p class="muted">Создайте аккаунт, чтобы делиться своими историями.</p>
 
-<form th:action="@{/auth/register}" method="post">
+<form id="register-form" th:action="@{/auth/register}" method="post">
 
     <label for="username">Имя пользователя</label>
-    <input id="username" type="text" name="username" required>
+    <input id="username" type="text" name="username" required minlength="3" maxlength="50"
+           pattern="[a-zA-Z][a-zA-Z0-9_]{2,49}"
+           title="От 3 до 50 символов: латинские буквы, цифры и _. Начните с буквы"
+           th:value="${registerRequest?.username}">
+    <div th:if="${registerRequest != null}" th:object="${registerRequest}">
+        <p class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}" role="alert"></p>
+    </div>
 
     <label for="email">Email</label>
-    <input id="email" type="email" name="email" required>
+    <input id="email" type="email" name="email" required th:value="${registerRequest?.email}">
+    <div th:if="${registerRequest != null}" th:object="${registerRequest}">
+        <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}" role="alert"></p>
+    </div>
 
     <label for="password">Пароль</label>
     <input id="password" type="password" name="password" required>
+    <div th:if="${registerRequest != null}" th:object="${registerRequest}">
+        <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}" role="alert"></p>
+    </div>
 
     <button type="submit">Зарегистрироваться</button>
 
 </form>
+<p id="register-error" class="form-error" role="alert" th:if="${error != null}" th:text="${error}"></p>
 <p class="form-footnote">Уже есть аккаунт? <a th:href="@{/auth/login}">Войти →</a></p>
 </div></main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/register.js}" defer></script>
 
 </body>
 </html>
