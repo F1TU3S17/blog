@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Ошибка</title>
+</head>
+<body>
+
+<h1>
+    Ошибка <span th:text="${status}">404</span>
+</h1>
+
+<p th:text="${message}">
+    Что-то пошло не так
+</p>
+
+<a th:href="@{/posts}">Вернуться к ленте</a>
+
+</body>
+</html>

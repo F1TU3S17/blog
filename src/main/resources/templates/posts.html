@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Лента</title>
+</head>
+<body>
+
+<div>
+    <h1>Профиль</h1>
+    <p th:text="${user.username}">Имя пользователя</p>
+    <p th:text="${user.id}">ID</p>
+</div>
+
+<div>
+    <a th:href="@{/posts/create}"> Создать пост </a>
+</div>
+
+<hr>
+
+<h1>Лента постов</h1>
+
+<div th:if="${posts.isEmpty()}">
+    <p>Постов пока нет</p>
+</div>
+
+<div th:each="post : ${posts.content}">
+    <article>
+        <h2 th:text="${post.title}">Название поста</h2>
+
+        <p th:text="${#strings.abbreviate(post.content, 150)}">
+            Краткое содержание
+        </p>
+
+        <small th:text="${post.createdAt}">
+            Дата публикации
+        </small>
+
+        <p>
+            <a th:href="@{/posts/{id}(id=${post.id})}">
+                Смотреть детали
+            </a>
+        </p>
+    </article>
+    <hr>
+</div>
+
+<div th:if="${posts.totalPages > 1}">
+
+    <a th:if="${posts.hasPrevious()}"
+       th:href="@{/posts(page=${posts.number - 1}, size=${posts.size})}">
+        Назад
+    </a>
+
+    <span th:each="pageNumber : ${#numbers.sequence(0, posts.totalPages - 1)}">
+
+        <strong th:if="${pageNumber == posts.number}"
+                th:text="${pageNumber + 1}"></strong>
+
+        <a th:unless="${pageNumber == posts.number}"
+           th:href="@{/posts(page=${pageNumber}, size=${posts.size})}"
+           th:text="${pageNumber + 1}"></a>
+
+    </span>
+
+    <a th:if="${posts.hasNext()}"
+       th:href="@{/posts(page=${posts.number + 1}, size=${posts.size})}">
+        Вперёд
+    </a>
+
+</div>
+
+<p>
+    Всего постов:
+    <span th:text="${posts.totalElements}">0</span>
+</p>
+
+</body>
+</html>

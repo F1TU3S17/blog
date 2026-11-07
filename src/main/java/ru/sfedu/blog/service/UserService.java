@@ -31,7 +31,7 @@ public class UserService {
     }
 
     public UserDetails loginUser(LoginRequest loginRequest) {
-        User user = userRepository.getByLoginInput(loginRequest.loginInput());
+        User user = userRepository.getByLogin(loginRequest.loginInput());
         if (!passwordEncoder.matches(loginRequest.password(), user.getPasswordHash())) {
             throw new AppException(AppErrorEnum.USER_PASSWORD_INCORRECT);
         }

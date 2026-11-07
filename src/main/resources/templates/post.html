@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${post.title}">Пост</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        article, .edit-section {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .post-content {
+            white-space: pre-wrap;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        input, textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        textarea {
+            min-height: 200px;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<a th:href="@{/posts}">← Назад к ленте</a>
+
+<!-- Просмотр поста -->
+<article id="post-view">
+
+    <h1 th:text="${post.title}">Название поста</h1>
+
+    <p>
+        Автор:
+        <span th:text="${post.author.username}">Автор</span>
+    </p>
+
+    <small th:text="${post.createdAt}">Дата</small>
+
+    <hr>
+
+    <div class="post-content"
+         th:text="${post.content}">
+        Содержимое поста
+    </div>
+
+    <!-- Доступно только автору -->
+    <div class="actions"
+         th:if="${user != null and user.id == post.author.id}">
+
+        <button type="button" onclick="showEditForm()">
+            Редактировать
+        </button>
+
+        <button type="button" onclick="deletePost()">
+            Удалить
+        </button>
+    </div>
+</article>
+
+<!-- Форма редактирования -->
+<section id="edit-section"
+         class="edit-section hidden"
+         th:if="${user != null and user.id == post.author.id}">
+
+    <h2>Редактирование поста</h2>
+
+    <form th:action="@{/posts/{id}(id=${post.id})}"
+          method="post">
+
+        <!-- POST преобразуется в PUT -->
+        <input type="hidden" name="_method" value="PUT">
+
+        <label for="title">Заголовок</label>
+        <input type="text"
+               id="title"
+               name="title"
+               th:value="${post.title}"
+               maxlength="100"
+               required>
+
+        <label for="content">Содержание</label>
+        <textarea id="content"
+                  name="content"
+                  required
+                  th:text="${post.content}"></textarea>
+
+        <div class="actions">
+            <button type="submit">Сохранить</button>
+
+            <button type="button" onclick="hideEditForm()">
+                Отмена
+            </button>
+        </div>
+    </form>
+</section>
+
+<script th:inline="javascript">
+    const postId = /*[[${post.id}]]*/ 0;
+    const postsUrl = /*[[@{/posts}]]*/ "/posts";
+
+    const csrfToken = /*[[${_csrf?.token}]]*/ null;
+    const csrfHeader = /*[[${_csrf?.headerName}]]*/ "X-CSRF-TOKEN";
+
+    function showEditForm() {
+        document.getElementById("post-view").classList.add("hidden");
+        document.getElementById("edit-section").classList.remove("hidden");
+    }
+
+    function hideEditForm() {
+        document.getElementById("edit-section").classList.add("hidden");
+        document.getElementById("post-view").classList.remove("hidden");
+    }
+
+    async function deletePost() {
+        if (!confirm("Вы уверены, что хотите удалить пост?")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${postsUrl}/${postId}`, {
+                method: "DELETE",
+                headers: csrfToken
+                    ? { [csrfHeader]: csrfToken }
+                    : {}
+            });
+
+            if (!response.ok) {
+                alert(`Ошибка удаления: ${response.status}`);
+                return;
+            }
+
+            window.location.href = postsUrl;
+
+        } catch (error) {
+            alert("Не удалось удалить пост");
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -21,10 +21,17 @@ public class UserRepositoryImplt {
         return user;
     }
 
-    public User getByLoginInput(String login) {
+    public User getByLogin(String login) {
         log.info("Find user by login: {}", login);
         return userRepository.findByLoginInput(login).orElseThrow(() -> {
             log.warn("User with login: {} is not found", login);
+            return new AppException(AppErrorEnum.USER_NOT_FOUND);
+        });
+    }
+
+    public User getById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> {
+            log.warn("User with id: {} is not fount", id);
             return new AppException(AppErrorEnum.USER_NOT_FOUND);
         });
     }

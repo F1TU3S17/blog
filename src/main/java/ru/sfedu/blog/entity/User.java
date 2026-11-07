@@ -6,6 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.blog.dto.UserResponse;
+import ru.sfedu.blog.dto.UserWithPostsResponse;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -17,15 +21,20 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private final String username;
+    @Column(nullable = false)
+    private String username;
 
+    @Column(nullable = false)
     private String email;
 
     @Enumerated(EnumType.STRING)
     @NotNull
-    private final UserRoleEnum role;
+    private UserRoleEnum role;
 
     private String passwordHash;
+
+    @OneToMany(mappedBy="author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts = new ArrayList<>();
 
     public User(String username, String email,String passwordHash) {
         this.username = username;
@@ -41,6 +50,18 @@ public class User {
                 email,
                 role,
                 passwordHash
+        );
+    }
+
+    public UserWithPostsResponse toDtoWithPosts() {
+        return new UserWithPostsResponse(
+                id,
+                username,
+                email,
+                role,
+                posts.stream()
+                        .map((Post::toDto))
+                        .toList()
         );
     }
 }

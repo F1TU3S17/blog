@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.sfedu.blog.entity.User;
+import ru.sfedu.blog.entity.UserRoleEnum;
 
 import java.util.Collection;
 import java.util.List;
@@ -57,5 +58,11 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
+    }
+
+    public boolean hasRole(UserRoleEnum userRole) {
+        return authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(currentRole -> userRole.withPrefix().equals(currentRole));
     }
 }

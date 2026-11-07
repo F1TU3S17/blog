@@ -8,7 +8,10 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum AppErrorEnum implements AppError {
     USER_NOT_FOUND(1, HttpStatus.NOT_FOUND, "User not found"),
-    USER_PASSWORD_INCORRECT(2, HttpStatus.BAD_REQUEST, "User entered an incorrect password");
+    USER_PASSWORD_INCORRECT(2, HttpStatus.BAD_REQUEST, "User entered an incorrect password"),
+    POST_NOT_FOUND(3, HttpStatus.NOT_FOUND, "Post not found"),
+    USER_CANT_EDIT_POST(4, HttpStatus.FORBIDDEN, "User can`t edit current post"),
+    USER_CANT_DELETE_POST(5, HttpStatus.FORBIDDEN, "User can`t delete post");
 
     private final int code;
     private final HttpStatus status;

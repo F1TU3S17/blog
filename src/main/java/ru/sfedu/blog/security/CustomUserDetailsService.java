@@ -15,7 +15,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(@NonNull String username)  {
-        User user = userRepositoryImplt.getByLoginInput(username);
+        User user = userRepositoryImplt.getByLogin(username);
         return new CustomUserDetails(user);
     }
 }

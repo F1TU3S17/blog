@@ -29,6 +29,5 @@ public class SessionService {
         SecurityContextHolder.setContext(context);
 
         securityContextRepository.saveContext(context, request, response);
-
     }
 }
