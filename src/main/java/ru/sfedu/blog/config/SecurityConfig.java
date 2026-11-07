@@ -19,7 +19,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/auth/**",
-                                "/css/**"
+                                "/css/**",
+                                "/js/**"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,

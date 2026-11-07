@@ -2,14 +2,24 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <title>Блог</title>
 </head>
 <body>
-<h1>Блог</h1>
-<nav>
-    <a th:href="@{/auth/login}">Войти</a>
-    <a th:href="@{/auth/register}">Регистрация</a>
-    <a th:href="@{/posts}">Посты</a>
-</nav>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page home-page">
+    <div class="home-hero">
+        <p class="eyebrow"><span></span> ПРОСТРАНСТВО ДЛЯ МЫСЛЕЙ</p>
+        <h1>Истории начинаются <em>здесь.</em></h1>
+        <p class="hero-description">Читайте, делитесь идеями и находите то, что откликается. У каждой мысли есть своё место.</p>
+        <div class="hero-actions">
+            <a class="button" th:href="@{/posts}">Перейти к постам <span aria-hidden="true">↗</span></a>
+            <a class="text-link" th:href="@{/auth/register}">Создать аккаунт <span aria-hidden="true">→</span></a>
+            <a class="text-link" th:href="@{/auth/login}">Войти</a>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>

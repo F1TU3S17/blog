@@ -2,23 +2,31 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <title>Логин</title>
 </head>
 <body>
 
-<h1>Логин</h1>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page form-page"><div class="form-card"><p class="eyebrow"><span></span> С РАДОСТЬЮ ВИДИМ ВАС СНОВА</p>
+<h1>Войти в блог<span class="brand-dot">.</span></h1>
+<p class="muted">Продолжайте читать и делиться своими историями.</p>
 
 <form th:action="@{/auth/login}" method="post">
 
-    <label>Username или email</label>
-    <input type="text" name="loginInput" required>
+    <label for="loginInput">Имя пользователя или email</label>
+    <input id="loginInput" type="text" name="loginInput" required>
 
-    <label>Password</label>
-    <input type="password" name="password" required>
+    <label for="password">Пароль</label>
+    <input id="password" type="password" name="password" required>
 
-    <button type="submit">Логин</button>
+    <button type="submit">Войти <span aria-hidden="true">↗</span></button>
 
 </form>
+<p class="form-footnote">Ещё нет аккаунта? <a th:href="@{/auth/register}">Зарегистрироваться →</a></p>
+</div></main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 
 </body>
 </html>

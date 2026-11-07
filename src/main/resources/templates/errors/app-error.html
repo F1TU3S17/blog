@@ -2,11 +2,14 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <title>Ошибка</title>
 </head>
 <body>
 
-<h1>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page form-page"><div class="form-card"><p class="eyebrow"><span></span> ЧТО-ТО ПОШЛО НЕ ТАК</p><h1>
     Ошибка <span th:text="${status}">404</span>
 </h1>
 
@@ -15,6 +18,8 @@
 </p>
 
 <a th:href="@{/posts}">Вернуться к ленте</a>
+</div></main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 
 </body>
 </html>

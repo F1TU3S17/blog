@@ -2,18 +2,27 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <title>Создание поста</title>
 </head>
 <body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page form-page"><div class="form-card editor-card"><p class="eyebrow"><span></span> НОВАЯ ИСТОРИЯ</p>
+<h1>Поделитесь мыслью<span class="brand-dot">.</span></h1>
+<p class="muted">Всё начинается с первой строчки.</p>
 <form th:action="@{/posts}" method="post">
 
-    <label>Название</label>
-    <input type="text" name="title" required>
+    <label for="title">Название</label>
+    <input id="title" type="text" name="title" required>
 
     <label for="content">Содержание</label>
     <textarea id="content" name="content" required></textarea>
     <button type="submit">Создать</button>
 
 </form>
+</div></main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title th:text="${user != null} ? |Профиль: ${user.username}| : 'Профиль'">Профиль</title>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page feed-page">
+<div class="profile-bar" th:if="${user != null}">
+    <div>
+        <span class="profile-label">ВАШ ПРОФИЛЬ</span>
+        <p th:text="${user.username}">Имя пользователя</p>
+        <span class="profile-id">ID <span th:text="${user.id}">ID</span></span>
+    </div>
+    <div class="profile-actions">
+        <form th:action="@{/auth/logout}" method="post">
+            <button class="button-quiet" type="submit">Выйти</button>
+        </form>
+    </div>
+</div>
+<div class="profile-bar" th:if="${user == null}">
+    <p>На данный момент вы не вошли в свой профиль</p>
+</div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

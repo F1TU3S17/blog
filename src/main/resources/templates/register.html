@@ -2,26 +2,34 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <title>Регистрация</title>
 </head>
 <body>
 
-<h1>Регистрация</h1>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page form-page"><div class="form-card"><p class="eyebrow"><span></span> ПРИСОЕДИНЯЙТЕСЬ</p>
+<h1>Начнём с вас<span class="brand-dot">.</span></h1>
+<p class="muted">Создайте аккаунт, чтобы делиться своими историями.</p>
 
 <form th:action="@{/auth/register}" method="post">
 
-    <label>Username</label>
-    <input type="text" name="username" required>
+    <label for="username">Имя пользователя</label>
+    <input id="username" type="text" name="username" required>
 
-    <label>Email</label>
-    <input type="email" name="email" required>
+    <label for="email">Email</label>
+    <input id="email" type="email" name="email" required>
 
-    <label>Password</label>
-    <input type="password" name="password" required>
+    <label for="password">Пароль</label>
+    <input id="password" type="password" name="password" required>
 
     <button type="submit">Зарегистрироваться</button>
 
 </form>
+<p class="form-footnote">Уже есть аккаунт? <a th:href="@{/auth/login}">Войти →</a></p>
+</div></main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 
 </body>
 </html>

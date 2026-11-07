@@ -3,50 +3,38 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <title>Лента</title>
 </head>
 <body>
 
-<div th:if="${user != null}">
-    <h1>Профиль</h1>
-    <p th:text="${user.username}">Имя пользователя</p>
-    <p th:text="${user.id}">ID</p>
-    <a th:href="@{/posts/create}"> Создать пост </a>
-    <form th:action="@{/auth/logout}" method="post">
-        <button type="submit">Выйти из аккаунта</button>
-    </form>
-</div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page feed-page">
+<div class="section-heading"><div><p class="eyebrow"><span></span> ИСТОРИИ И ИДЕИ</p><h1>Лента постов<span class="brand-dot">.</span></h1></div><p>Читайте то, что важно.</p></div>
 
-<hr>
-
-<h1>Лента постов</h1>
-
-<div th:if="${posts.isEmpty()}">
+<div class="empty-state" th:if="${posts.isEmpty()}">
     <p>Постов пока нет</p>
 </div>
 
-<div th:each="post : ${posts.content}">
-    <article>
+<div class="post-list"><div th:each="post : ${posts.content}">
+    <article class="post-card">
+        <div class="post-card-meta"><span>ПОСТ</span><small th:attr="data-date=${post.createdAt}" th:text="${post.createdAt}">Дата публикации</small></div>
         <h2 th:text="${post.title}">Название поста</h2>
 
         <p th:text="${#strings.abbreviate(post.content, 150)}">
             Краткое содержание
         </p>
 
-        <small th:text="${post.createdAt}">
-            Дата публикации
-        </small>
-
         <p>
             <a th:href="@{/posts/{id}(id=${post.id})}">
-                Смотреть детали
+                Читать пост <span aria-hidden="true">↗</span>
             </a>
         </p>
     </article>
-    <hr>
-</div>
+</div></div>
 
-<div th:if="${posts.totalPages > 1}">
+<div class="pagination" th:if="${posts.totalPages > 1}">
 
     <a th:if="${posts.hasPrevious()}"
        th:href="@{/posts(page=${posts.number - 1}, size=${posts.size})}">
@@ -71,10 +59,13 @@
 
 </div>
 
-<p>
+<p class="feed-count">
     Всего постов:
     <span th:text="${posts.totalElements}">0</span>
 </p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/date.js}" defer></script>
 
 </body>
 </html>

@@ -3,59 +3,18 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <title th:text="${post.title}">Пост</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-
-        article, .edit-section {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-        }
-
-        .post-content {
-            white-space: pre-wrap;
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        input, textarea {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 10px;
-            margin: 10px 0;
-        }
-
-        textarea {
-            min-height: 200px;
-        }
-
-        button {
-            padding: 10px 15px;
-            cursor: pointer;
-        }
-
-        .hidden {
-            display: none;
-        }
-    </style>
 </head>
 <body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page detail-page" id="post-page" th:attr="data-post-id=${post.id},data-posts-url=@{/posts},data-csrf-token=${_csrf?.token},data-csrf-header=${_csrf?.headerName}">
+<a class="back-link" th:href="@{/posts}">← Назад к ленте</a>
 
-<a th:href="@{/posts}">← Назад к ленте</a>
-
-<!-- Просмотр поста -->
-<article id="post-view">
+<article class="detail-card" id="post-view">
+    <p class="eyebrow"><span></span> ИСТОРИЯ</p>
 
     <h1 th:text="${post.title}">Название поста</h1>
 
@@ -64,7 +23,7 @@
         <span th:text="${post.author.username}">Автор</span>
     </p>
 
-    <small th:text="${post.createdAt}">Дата</small>
+    <small th:attr="data-date=${post.createdAt}" th:text="${post.createdAt}">Дата</small>
 
     <hr>
 
@@ -91,7 +50,6 @@
     </div>
 </article>
 
-<!-- Форма редактирования -->
 <section id="edit-section"
          class="edit-section hidden"
          th:if="${user != null and user.id == post.author.id}">
@@ -126,49 +84,10 @@
         </div>
     </form>
 </section>
-
-<script th:inline="javascript">
-    const postId = /*[[${post.id}]]*/ 0;
-    const postsUrl = /*[[@{/posts}]]*/ "/posts";
-
-    const csrfToken = /*[[${_csrf?.token}]]*/ null;
-    const csrfHeader = /*[[${_csrf?.headerName}]]*/ "X-CSRF-TOKEN";
-
-    function showEditForm() {
-        document.getElementById("post-view").classList.add("hidden");
-        document.getElementById("edit-section").classList.remove("hidden");
-    }
-
-    function hideEditForm() {
-        document.getElementById("edit-section").classList.add("hidden");
-        document.getElementById("post-view").classList.remove("hidden");
-    }
-
-    async function deletePost() {
-        if (!confirm("Вы уверены, что хотите удалить пост?")) {
-            return;
-        }
-
-        try {
-            const response = await fetch(`${postsUrl}/${postId}`, {
-                method: "DELETE",
-                headers: csrfToken
-                    ? { [csrfHeader]: csrfToken }
-                    : {}
-            });
-
-            if (!response.ok) {
-                alert(`Ошибка удаления: ${response.status}`);
-                return;
-            }
-
-            window.location.href = postsUrl;
-
-        } catch (error) {
-            alert("Не удалось удалить пост");
-        }
-    }
-</script>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/date.js}" defer></script>
+<script th:src="@{/js/post.js}" defer></script>
 
 </body>
 </html>

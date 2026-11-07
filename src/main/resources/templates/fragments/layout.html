@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<body>
+<header class="site-header" th:fragment="header">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-mark">б.</span><span>блог<span class="brand-dot">.</span></span></a>
+        <nav class="main-nav" aria-label="Основная навигация">
+            <a th:href="@{/}">Главная</a>
+            <a th:href="@{/auth/profile}">Профиль</a>
+            <a th:href="@{/posts}">Лента</a>
+            <a sec:authorize="isAnonymous()" th:href="@{/auth/login}">Войти</a>
+            <a sec:authorize="isAnonymous()" class="nav-action" th:href="@{/auth/register}">Регистрация <span aria-hidden="true">↗</span></a>
+            <a sec:authorize="isAuthenticated()" class="nav-action" th:href="@{/posts/create}">Создать пост <span aria-hidden="true">↗</span></a>
+        </nav>
+    </div>
+</header>
+<footer class="site-footer" th:fragment="footer">
+    <div class="footer-inner"><span class="footer-brand">блог<span class="brand-dot">.</span></span><span>Место для ваших историй</span><a th:href="@{/posts}">К ленте ↑</a></div>
+</footer>
+</body>
+</html>

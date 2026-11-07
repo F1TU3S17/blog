@@ -78,6 +78,16 @@ class BlogHttpIntegrationTest {
     }
 
     @Test
+    void profile_rendersForAnonymousAndAuthenticatedUsers() throws Exception {
+        assertTrue(new Browser().get("/auth/profile").body().contains("<title>Профиль</title>"));
+        Browser browser = new Browser();
+        browser.register("alice", "alice@example.com", "secret123");
+        TestResponse response = browser.get("/auth/profile");
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("<title>Профиль: alice</title>"));
+    }
+
+    @Test
     void login_wrongPassword_doesNotAuthenticate() throws Exception {
         new Browser().register("alice", "alice@example.com", "secret123");
         Browser browser = new Browser();
