@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <title th:text="${post.title}">Пост</title>
 
 </head>
-<body>
+<body th:attr="data-theme=${currentTheme}">
 <header th:replace="~{fragments/layout :: header}"></header>
 <main class="page detail-page" id="post-page" th:attr="data-post-id=${post.id},data-posts-url=@{/posts},data-csrf-token=${_csrf?.token},data-csrf-header=${_csrf?.headerName}">
 <a class="back-link" th:href="@{/posts}">← Назад к ленте</a>

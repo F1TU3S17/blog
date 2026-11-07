@@ -40,7 +40,7 @@ public class AuthController {
 
         sessionService.authenticateSession(userDetails, request, response);
 
-        return "redirect:/home";
+        return "redirect:/posts";
     }
 
     @GetMapping("/login")

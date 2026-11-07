@@ -12,6 +12,12 @@
             <a sec:authorize="isAnonymous()" class="nav-action" th:href="@{/auth/register}">Регистрация <span aria-hidden="true">↗</span></a>
             <a sec:authorize="isAuthenticated()" class="nav-action" th:href="@{/posts/create}">Создать пост <span aria-hidden="true">↗</span></a>
         </nav>
+        <form class="theme-form" th:action="@{/change-theme}" method="post">
+            <input type="hidden" name="theme" th:value="${currentTheme == 'dark' ? 'light' : 'dark'}">
+            <button class="theme-toggle" type="submit" th:attr="aria-label=${currentTheme == 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему'},title=${currentTheme == 'dark' ? 'Светлая тема' : 'Тёмная тема'}">
+                <span aria-hidden="true" th:text="${currentTheme == 'dark' ? '☀' : '☾'}">☾</span>
+            </button>
+        </form>
     </div>
 </header>
 <footer class="site-footer" th:fragment="footer">

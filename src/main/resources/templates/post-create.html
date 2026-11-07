@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <title>Создание поста</title>
 </head>
-<body>
+<body th:attr="data-theme=${currentTheme}">
 <header th:replace="~{fragments/layout :: header}"></header>
 <main class="page form-page"><div class="form-card editor-card"><p class="eyebrow"><span></span> НОВАЯ ИСТОРИЯ</p>
 <h1>Поделитесь мыслью<span class="brand-dot">.</span></h1>

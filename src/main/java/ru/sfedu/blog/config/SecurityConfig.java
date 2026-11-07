@@ -19,6 +19,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/auth/**",
+                                "/change-theme",
                                 "/css/**",
                                 "/js/**"
                         ).permitAll()

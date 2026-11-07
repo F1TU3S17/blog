@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <title th:text="${user != null} ? |Профиль: ${user.username}| : 'Профиль'">Профиль</title>
 </head>
-<body>
+<body th:attr="data-theme=${currentTheme}">
 <header th:replace="~{fragments/layout :: header}"></header>
 <main class="page feed-page">
 <div class="profile-bar" th:if="${user != null}">
