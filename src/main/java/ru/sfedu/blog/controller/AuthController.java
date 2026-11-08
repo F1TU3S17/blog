@@ -17,13 +17,13 @@ import ru.sfedu.blog.dto.LoginRequest;
 import ru.sfedu.blog.dto.RegisterRequest;
 import ru.sfedu.blog.security.CustomUserDetails;
 import ru.sfedu.blog.service.SessionService;
-import ru.sfedu.blog.service.UserService;
+import ru.sfedu.blog.service.AuthService;
 
 @Controller
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final UserService userService;
+    private final AuthService authService;
     private final SessionService sessionService;
 
     @GetMapping("/register")
@@ -41,7 +41,7 @@ public class AuthController {
         if (bindingResult.hasErrors()) {
             return "register";
         }
-        UserDetails userDetails = userService.registerUser(registerRequest);
+        UserDetails userDetails = authService.registerUser(registerRequest);
 
         sessionService.authenticateSession(userDetails, request, response);
 
@@ -63,7 +63,7 @@ public class AuthController {
         if (bindingResult.hasErrors()) {
             return "login";
         }
-        UserDetails userDetails = userService.loginUser(loginRequest);
+        UserDetails userDetails = authService.loginUser(loginRequest);
 
         sessionService.authenticateSession(userDetails, request, response);
 

@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import jakarta.servlet.http.Cookie;
+import ru.sfedu.blog.dto.PostWithCommentsResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +39,7 @@ class BlogHttpIntegrationTest {
     void cleanDatabase() {
         jdbc.update("DELETE FROM spring_session_attributes");
         jdbc.update("DELETE FROM spring_session");
+        jdbc.update("DELETE FROM comments");
         jdbc.update("DELETE FROM posts");
         jdbc.update("DELETE FROM users");
     }
@@ -74,7 +76,7 @@ class BlogHttpIntegrationTest {
         assertEquals("alice@example.com", user.get("email"));
         assertNotEquals("secret123", user.get("password_hash"));
         assertTrue(passwordEncoder.matches("secret123", (String) user.get("password_hash")));
-        assertTrue(browser.get("/posts").body().contains("alice"));
+        assertTrue(browser.get("/auth/profile").body().contains("alice"));
         assertTrue(jdbc.queryForObject("SELECT count(*) FROM spring_session", Integer.class) > 0);
     }
 
@@ -83,7 +85,7 @@ class BlogHttpIntegrationTest {
         new Browser().register("alice", "alice@example.com", "secret123");
         Browser browser = new Browser();
         assertEquals(302, browser.login("alice", "secret123").statusCode());
-        assertTrue(browser.get("/posts").body().contains("alice"));
+        assertTrue(browser.get("/auth/profile").body().contains("alice"));
         assertEquals(200, browser.get("/posts/create").statusCode());
         assertFalse(new Browser().get("/posts").body().contains("alice"));
         assertTrue(jdbc.queryForObject("SELECT count(*) FROM spring_session_attributes WHERE attribute_name = 'SPRING_SECURITY_CONTEXT'", Integer.class) > 0);
@@ -200,6 +202,203 @@ class BlogHttpIntegrationTest {
         assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM posts WHERE id = ?", Integer.class, id));
     }
 
+    @Test
+    void getPost_withComments_returnsOnlyCommentsForThatPost() throws Exception {
+        Browser owner = new Browser();
+        owner.register("alice", "alice@example.com", "secret123");
+        owner.createPost("First", "First body");
+        owner.createPost("Second", "Second body");
+        long firstId = jdbc.queryForObject("SELECT id FROM posts WHERE title = 'First'", Long.class);
+        long secondId = jdbc.queryForObject("SELECT id FROM posts WHERE title = 'Second'", Long.class);
+        long authorId = jdbc.queryForObject("SELECT id FROM users WHERE username = 'alice'", Long.class);
+        jdbc.update("INSERT INTO comments (text, post_id, author_id) VALUES (?, ?, ?)", "First comment", firstId, authorId);
+        jdbc.update("INSERT INTO comments (text, post_id, author_id) VALUES (?, ?, ?)", "Second comment", firstId, authorId);
+        jdbc.update("INSERT INTO comments (text, post_id, author_id) VALUES (?, ?, ?)", "Other post comment", secondId, authorId);
+
+        MvcResult result = mockMvc.perform(get("/posts/{id}", firstId)).andReturn();
+        assertEquals(200, result.getResponse().getStatus());
+        PostWithCommentsResponse post = assertInstanceOf(PostWithCommentsResponse.class,
+                result.getModelAndView().getModel().get("post"));
+        assertEquals(firstId, post.id());
+        assertEquals("First", post.title());
+        assertEquals(2, post.comments().size());
+        assertEquals(java.util.Set.of("First comment", "Second comment"),
+                post.comments().stream().map(comment -> comment.text()).collect(java.util.stream.Collectors.toSet()));
+        assertTrue(post.comments().stream().allMatch(comment -> comment.authorId().equals(authorId)));
+    }
+
+    @Test
+    void getPost_withoutComments_returnsEmptyList() throws Exception {
+        Browser owner = new Browser();
+        owner.register("alice", "alice@example.com", "secret123");
+        owner.createPost("Empty", "Body");
+        long postId = jdbc.queryForObject("SELECT id FROM posts", Long.class);
+
+        MvcResult result = mockMvc.perform(get("/posts/{id}", postId)).andReturn();
+        assertEquals(200, result.getResponse().getStatus());
+        PostWithCommentsResponse post = assertInstanceOf(PostWithCommentsResponse.class,
+                result.getModelAndView().getModel().get("post"));
+        assertTrue(post.comments().isEmpty());
+    }
+
+    @Test
+    void getPost_missingPost_returnsNotFound() throws Exception {
+        assertEquals(404, new Browser().get("/posts/999").statusCode());
+    }
+
+    @Test
+    void getPost_illegalPost_returnsNotFound() throws Exception {
+        assertEquals(403, new Browser().get("/posts/-1").statusCode());
+    }
+
+    @Test
+    void createComment_authenticatedUser_persistsTextPostAndAuthor() throws Exception {
+        Browser author = new Browser();
+        author.register("alice", "alice@example.com", "secret123");
+        author.createPost("Post", "Body");
+        long postId = jdbc.queryForObject("SELECT id FROM posts", Long.class);
+
+        TestResponse response = author.createComment(postId, "Hello comment");
+
+        assertEquals(302, response.statusCode());
+        assertEquals("/posts/" + postId, response.location());
+        Map<String, Object> comment = jdbc.queryForMap("SELECT c.text, c.post_id, u.username FROM comments c JOIN users u ON u.id = c.author_id");
+        assertEquals("Hello comment", comment.get("text"));
+        assertEquals(postId, ((Number) comment.get("post_id")).longValue());
+        assertEquals("alice", comment.get("username"));
+    }
+
+    @Test
+    void createComment_invalidText_isRejectedWithoutChangingComments() throws Exception {
+        Browser author = new Browser();
+        author.register("alice", "alice@example.com", "secret123");
+        author.createPost("Post", "Body");
+        long postId = jdbc.queryForObject("SELECT id FROM posts", Long.class);
+        long authorId = jdbc.queryForObject("SELECT id FROM users", Long.class);
+        jdbc.update("INSERT INTO comments (text, post_id, author_id) VALUES (?, ?, ?)", "Existing", postId, authorId);
+
+        for (Map<String, String> fields : java.util.List.of(
+                Map.<String, String>of(),
+                Map.of("text", ""),
+                Map.of("text", "   "),
+                Map.of("text", "a".repeat(2001)))) {
+            TestResponse response = author.submit("POST", "/comments/" + postId, "/posts/create", fields);
+
+            assertEquals(400, response.statusCode(), "Invalid text must be rejected: " + fields);
+            assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM comments", Integer.class));
+            assertEquals("Existing", jdbc.queryForObject("SELECT text FROM comments", String.class));
+        }
+    }
+
+    @Test
+    void createComment_validTextLengthBoundaries_arePersisted() throws Exception {
+        Browser author = new Browser();
+        author.register("alice", "alice@example.com", "secret123");
+        author.createPost("Post", "Body");
+        long postId = jdbc.queryForObject("SELECT id FROM posts", Long.class);
+
+        for (String text : java.util.List.of("a", "b".repeat(1000))) {
+            TestResponse response = author.createComment(postId, text);
+
+            assertEquals(302, response.statusCode());
+            assertEquals("/posts/" + postId, response.location());
+            assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM comments WHERE post_id = ? AND text = ?",
+                    Integer.class, postId, text));
+        }
+        assertEquals(2, jdbc.queryForObject("SELECT count(*) FROM comments", Integer.class));
+    }
+
+    @Test
+    void createComment_missingPost_doesNotPersist() throws Exception {
+        Browser author = new Browser();
+        author.register("alice", "alice@example.com", "secret123");
+        assertEquals(404, author.createComment(-1, "Missing post").statusCode());
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM comments", Integer.class));
+    }
+
+    @Test
+    void createComment_anonymousUser_doesNotPersist() throws Exception {
+        Browser owner = new Browser();
+        owner.register("alice", "alice@example.com", "secret123");
+        owner.createPost("Post", "Body");
+        long postId = jdbc.queryForObject("SELECT id FROM posts", Long.class);
+        Browser guest = new Browser();
+        assertEquals(403, guest.submit("POST", "/comments/" + postId, "/auth/login", Map.of("text", "Forbidden")).statusCode());
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM comments", Integer.class));
+    }
+
+    @Test
+    void deleteComment_author_removesOnlyOwnComment() throws Exception {
+        Browser author = new Browser();
+        author.register("alice", "alice@example.com", "secret123");
+        author.createPost("Post", "Body");
+        long postId = jdbc.queryForObject("SELECT id FROM posts", Long.class);
+        long authorId = jdbc.queryForObject("SELECT id FROM users", Long.class);
+        jdbc.update("INSERT INTO comments (text, post_id, author_id) VALUES (?, ?, ?)", "Keep", postId, authorId);
+        jdbc.update("INSERT INTO comments (text, post_id, author_id) VALUES (?, ?, ?)", "Delete", postId, authorId);
+        long commentId = jdbc.queryForObject("SELECT id FROM comments WHERE text = 'Delete'", Long.class);
+        if (commentId == authorId) {
+            jdbc.update("DELETE FROM comments WHERE id = ?", commentId);
+            jdbc.update("INSERT INTO comments (text, post_id, author_id) VALUES (?, ?, ?)", "Delete", postId, authorId);
+            commentId = jdbc.queryForObject("SELECT id FROM comments WHERE text = 'Delete'", Long.class);
+        }
+        assertNotEquals(authorId, commentId);
+
+        TestResponse response = author.deleteComment(commentId);
+
+        assertEquals(302, response.statusCode());
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM comments WHERE id = ?", Integer.class, commentId));
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM comments WHERE text = 'Keep'", Integer.class));
+    }
+
+    @Test
+    void deleteComment_anotherUser_isForbiddenAndCommentRemains() throws Exception {
+        Browser owner = new Browser();
+        owner.register("alice", "alice@example.com", "secret123");
+        owner.createPost("Post", "Body");
+        long postId = jdbc.queryForObject("SELECT id FROM posts", Long.class);
+        long ownerId = jdbc.queryForObject("SELECT id FROM users", Long.class);
+        jdbc.update("INSERT INTO comments (text, post_id, author_id) VALUES (?, ?, ?)", "Keep", postId, ownerId);
+        long commentId = jdbc.queryForObject("SELECT id FROM comments", Long.class);
+        Browser other = new Browser();
+        other.register("bob", "bob@example.com", "secret123");
+
+        assertEquals(403, other.deleteComment(commentId).statusCode());
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM comments WHERE id = ?", Integer.class, commentId));
+    }
+
+    @Test
+    void deleteComment_missingComment_returnsNotFound() throws Exception {
+        Browser author = new Browser();
+        author.register("alice", "alice@example.com", "secret123");
+        assertEquals(404, author.deleteComment(999).statusCode());
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM comments", Integer.class));
+    }
+
+    @Test
+    void deleteComment_illegalComment_returnsNotFound() throws Exception {
+        Browser author = new Browser();
+        author.register("alice", "alice@example.com", "secret123");
+        assertEquals(404, author.deleteComment(-1).statusCode());
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM comments", Integer.class));
+    }
+
+
+    @Test
+    void deleteComment_anonymousUser_isForbiddenAndCommentRemains() throws Exception {
+        Browser owner = new Browser();
+        owner.register("alice", "alice@example.com", "secret123");
+        owner.createPost("Post", "Body");
+        long postId = jdbc.queryForObject("SELECT id FROM posts", Long.class);
+        long ownerId = jdbc.queryForObject("SELECT id FROM users", Long.class);
+        jdbc.update("INSERT INTO comments (text, post_id, author_id) VALUES (?, ?, ?)", "Keep", postId, ownerId);
+        long commentId = jdbc.queryForObject("SELECT id FROM comments", Long.class);
+
+        Browser guest = new Browser();
+        assertEquals(403, guest.submit("DELETE", "/comments/" + commentId, "/auth/login", Map.of()).statusCode());
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM comments WHERE id = ?", Integer.class, commentId));
+    }
+
     private record TestResponse(int statusCode, String body, String location) {}
 
     private class Browser {
@@ -220,6 +419,14 @@ class BlogHttpIntegrationTest {
 
         TestResponse createPost(String title, String content) throws Exception {
             return submit("POST", "/posts", "/posts/create", Map.of("title", title, "content", content));
+        }
+
+        TestResponse createComment(long postId, String text) throws Exception {
+            return submit("POST", "/comments/" + postId, "/posts/create", Map.of("text", text));
+        }
+
+        TestResponse deleteComment(long commentId) throws Exception {
+            return submit("DELETE", "/comments/" + commentId, "/posts/create", Map.of());
         }
 
         TestResponse submit(String method, String path, String formPage, Map<String, String> fields) throws Exception {

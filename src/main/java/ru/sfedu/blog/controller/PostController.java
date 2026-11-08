@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.sfedu.blog.dto.PostCreationRequest;
 import ru.sfedu.blog.dto.PostResponse;
 import ru.sfedu.blog.dto.PostUpdateRequest;
+import ru.sfedu.blog.dto.PostWithCommentsResponse;
 import ru.sfedu.blog.security.CustomUserDetails;
 import ru.sfedu.blog.service.PostService;
 
@@ -46,7 +47,7 @@ public class PostController {
             Model model,
             @PathVariable("id") Long id
     ) {
-        PostResponse post = postService.getPostById(id);
+        PostWithCommentsResponse post = postService.getPostById(id);
         model.addAttribute("post", post);
         model.addAttribute("user", user);
 

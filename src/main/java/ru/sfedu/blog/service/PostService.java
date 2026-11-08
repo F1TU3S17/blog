@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.blog.dto.PostCreationRequest;
 import ru.sfedu.blog.dto.PostResponse;
 import ru.sfedu.blog.dto.PostUpdateRequest;
+import ru.sfedu.blog.dto.PostWithCommentsResponse;
 import ru.sfedu.blog.entity.Post;
 import ru.sfedu.blog.entity.UserRoleEnum;
 import ru.sfedu.blog.exception.AppErrorEnum;
@@ -58,8 +59,8 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PostResponse getPostById(Long id) {
-        return postRepository.getById(id).toDto();
+    public PostWithCommentsResponse getPostById(Long id) {
+        return postRepository.getById(id).toDtoWithComments();
     }
 
     @Transactional(readOnly = true)

@@ -5,8 +5,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.blog.dto.PostResponse;
+import ru.sfedu.blog.dto.PostWithCommentsResponse;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="posts")
@@ -28,6 +31,9 @@ public class Post {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+    @OneToMany(mappedBy="post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
     @Column(nullable = false)
     private Instant createdAt;
 
@@ -45,6 +51,19 @@ public class Post {
                 content,
                 author.toDto(),
                 createdAt
+        );
+    }
+
+    public PostWithCommentsResponse toDtoWithComments() {
+        return new PostWithCommentsResponse(
+                id,
+                title,
+                content,
+                author.toDto(),
+                createdAt,
+                comments.stream()
+                        .map(Comment::toDto)
+                        .toList()
         );
     }
 }

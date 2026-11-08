@@ -17,7 +17,7 @@ import ru.sfedu.blog.security.CustomUserDetails;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserService {
+public class AuthService {
     private final UserRepositoryImplt userRepository;
     private final PasswordEncoder passwordEncoder;
 
