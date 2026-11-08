@@ -85,6 +85,44 @@
         </div>
     </form>
 </section>
+
+<section class="comments-section" aria-labelledby="comments-heading">
+    <div class="comments-heading">
+        <h2 id="comments-heading">Комментарии <span th:text="${#lists.size(post.comments)}">0</span></h2>
+    </div>
+
+    <div class="comment-compose" th:if="${user != null}">
+        <h3>Присоединиться к обсуждению</h3>
+        <form th:action="@{/comments/{id}(id=${post.id})}" method="post">
+            <label for="comment-text">Ваш комментарий</label>
+            <textarea id="comment-text" name="text" maxlength="1000" required
+                      placeholder="Поделитесь своим мнением"></textarea>
+            <button type="submit">Отправить комментарий</button>
+        </form>
+    </div>
+    <p class="comment-login" th:if="${user == null}">
+        <a th:href="@{/auth/login}">Войдите</a>, чтобы присоединиться к обсуждению.
+    </p>
+
+    <p class="comments-empty" th:if="${#lists.isEmpty(post.comments)}">Пока нет комментариев. Будьте первым!</p>
+    <div class="comment-list" th:unless="${#lists.isEmpty(post.comments)}">
+        <article class="comment-card" th:each="comment : ${post.comments}">
+            <div class="comment-header">
+                <div class="comment-meta">
+                    <strong th:text="${comment.authorUsername}">Автор</strong>
+                    <time th:attr="datetime=${comment.createdAt},data-date=${comment.createdAt}" th:text="${comment.createdAt}">Дата</time>
+                </div>
+                <form class="comment-delete-form" th:if="${user != null and (user.id == comment.authorId or user.hasRole(T(ru.sfedu.blog.entity.UserRoleEnum).ADMIN))}"
+                      th:action="@{/comments/{id}(id=${comment.id})}" method="post">
+                    <button class="comment-delete" type="submit" aria-label="Удалить комментарий" title="Удалить комментарий">
+                        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6m4-6v6M5 7l1 13h12l1-13M9 7V4h6v3"/></svg>
+                    </button>
+                </form>
+            </div>
+            <p class="comment-text" th:text="${comment.text}">Текст комментария</p>
+        </article>
+    </div>
+</section>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 <script th:src="@{/js/date.js}" defer></script>

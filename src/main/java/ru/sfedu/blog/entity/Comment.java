@@ -44,6 +44,7 @@ public class Comment {
                 id,
                 text,
                 author.getId(),
+                author.getUsername(),
                 createdAt
         );
     }

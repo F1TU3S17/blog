@@ -84,6 +84,26 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 22px 0; }
 .actions button + button { background: var(--surface); color: var(--blue); }
 .actions button + button:hover { background: var(--surface-hover); }
 .hidden { display: none; }
+.comments-section { margin-top: 24px; border: 1px solid var(--line); background: var(--surface); }
+.comments-heading { padding: 24px 30px 18px; border-bottom: 1px solid var(--line); }
+.comments-heading h2 { margin: 0; color: var(--heading); font-size: 21px; }
+.comments-heading h2 span { margin-left: 6px; color: var(--muted); font-size: 14px; font-weight: 400; }
+.comment-compose, .comment-login { margin: 0; padding: 24px 30px; border-bottom: 1px solid var(--line); }
+.comment-compose h3 { margin: 0 0 16px; color: var(--heading); font-size: 15px; }
+.comment-compose textarea { min-height: 100px; margin-bottom: 12px; }
+.comment-compose button { align-self: flex-start; }
+.comment-login, .comments-empty { color: var(--muted); font-size: 14px; }
+.comments-empty { margin: 0; padding: 26px 30px; }
+.comment-card { padding: 22px 30px; border-bottom: 1px solid var(--line); }
+.comment-card:last-child { border-bottom: 0; }
+.comment-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.comment-meta { display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px; font-size: 13px; }
+.comment-meta strong { color: var(--heading); }
+.comment-meta time { color: var(--muted); font-size: 12px; }
+.comment-delete { min-width: 32px; min-height: 32px; padding: 6px; border: 0; background: transparent; color: var(--muted); }
+.comment-delete:hover { background: var(--surface-hover); color: var(--error); }
+.comment-delete:disabled { opacity: .5; cursor: wait; }
+.comment-text { margin: 12px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 600px) {
     .header-inner, .footer-inner { padding-left: 16px; padding-right: 16px; }
     .header-inner { min-height: 56px; flex-wrap: wrap; gap: 8px 12px; padding-top: 8px; padding-bottom: 8px; }
@@ -97,4 +117,5 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 22px 0; }
     .home-note, .footer-inner { flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px; }
     .profile-bar, .section-heading { align-items: flex-start; flex-direction: column; }
     .section-heading { gap: 8px; }
+    .comments-heading, .comment-compose, .comment-login, .comments-empty, .comment-card { padding-left: 22px; padding-right: 22px; }
 }

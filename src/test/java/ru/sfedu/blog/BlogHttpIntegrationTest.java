@@ -99,6 +99,14 @@ class BlogHttpIntegrationTest {
         TestResponse response = browser.get("/auth/profile");
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("<title>Профиль: alice</title>"));
+        assertFalse(response.body().contains(">Админ</span>"));
+
+        jdbc.update("UPDATE users SET role = 'ADMIN' WHERE username = 'alice'");
+        Browser admin = new Browser();
+        admin.login("alice", "secret123");
+        TestResponse adminResponse = admin.get("/auth/profile");
+        assertEquals(200, adminResponse.statusCode());
+        assertTrue(adminResponse.body().contains(">Админ</span>"));
     }
 
     @Test
@@ -148,7 +156,9 @@ class BlogHttpIntegrationTest {
         Browser guest = new Browser();
         assertEquals(200, guest.get("/auth/login").statusCode());
         assertEquals(200, guest.get("/auth/register").statusCode());
-        assertEquals(200, guest.get("/posts").statusCode());
+        TestResponse feed = guest.get("/posts");
+        assertEquals(200, feed.statusCode());
+        assertTrue(feed.body().contains("Автор: <span>alice</span>"));
         assertEquals(200, guest.get("/posts/" + id).statusCode());
         assertEquals(403, guest.get("/posts/create").statusCode());
     }
@@ -239,6 +249,39 @@ class BlogHttpIntegrationTest {
         PostWithCommentsResponse post = assertInstanceOf(PostWithCommentsResponse.class,
                 result.getModelAndView().getModel().get("post"));
         assertTrue(post.comments().isEmpty());
+    }
+
+    @Test
+    void postComments_renderControlsAccordingToUserPermissions() throws Exception {
+        Browser owner = new Browser();
+        owner.register("alice", "alice@example.com", "secret123");
+        owner.createPost("Post", "Body");
+        long postId = jdbc.queryForObject("SELECT id FROM posts", Long.class);
+        long ownerId = jdbc.queryForObject("SELECT id FROM users WHERE username = 'alice'", Long.class);
+        jdbc.update("INSERT INTO comments (text, post_id, author_id) VALUES (?, ?, ?)", "Hello <world>", postId, ownerId);
+        String page = "/posts/" + postId;
+
+        String guestPage = new Browser().get(page).body();
+        assertTrue(guestPage.contains("Hello &lt;world&gt;"));
+        assertTrue(guestPage.contains("alice"));
+        assertTrue(guestPage.contains("чтобы присоединиться к обсуждению"));
+        assertFalse(guestPage.contains("id=\"comment-text\""));
+        assertFalse(guestPage.contains("class=\"comment-delete-form\""));
+
+        String ownerPage = owner.get(page).body();
+        assertTrue(ownerPage.contains("id=\"comment-text\""));
+        assertTrue(ownerPage.contains("class=\"comment-delete-form\""));
+
+        Browser other = new Browser();
+        other.register("bobby", "bobby@example.com", "secret123");
+        String otherPage = other.get(page).body();
+        assertTrue(otherPage.contains("id=\"comment-text\""));
+        assertFalse(otherPage.contains("class=\"comment-delete-form\""));
+
+        jdbc.update("UPDATE users SET role = 'ADMIN' WHERE username = 'bobby'");
+        Browser admin = new Browser();
+        admin.login("bobby", "secret123");
+        assertTrue(admin.get(page).body().contains("class=\"comment-delete-form\""));
     }
 
     @Test

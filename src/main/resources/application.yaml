@@ -17,6 +17,7 @@ spring:
       table-name: SPRING_SESSION
 
 server:
+  port: 8181
   servlet:
       cookie:
         http-only: true

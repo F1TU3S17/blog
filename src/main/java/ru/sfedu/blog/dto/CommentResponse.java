@@ -6,5 +6,6 @@ public record CommentResponse(
     Long id,
     String text,
     Long authorId,
+    String authorUsername,
     Instant createdAt
 ) {}

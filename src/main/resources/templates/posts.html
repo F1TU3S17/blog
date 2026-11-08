@@ -20,7 +20,12 @@
 
 <div class="post-list"><div th:each="post : ${posts.content}">
     <article class="post-card">
-        <div class="post-card-meta"><span>ПОСТ</span><small th:attr="data-date=${post.createdAt}" th:text="${post.createdAt}">Дата публикации</small></div>
+        <div class="post-card-meta">
+            <span>Автор:
+                <span th:text="${post.author.username}">Имя пользователя</span>
+            </span>
+            <small th:attr="data-date=${post.createdAt}" th:text="${post.createdAt}">Дата публикации</small>
+        </div>
         <h2 th:text="${post.title}">Название поста</h2>
 
         <p th:text="${#strings.abbreviate(post.content, 150)}">

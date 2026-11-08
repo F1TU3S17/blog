@@ -15,6 +15,7 @@
         <span class="profile-label">ВАШ ПРОФИЛЬ</span>
         <p th:text="${user.username}">Имя пользователя</p>
         <span class="profile-id">ID <span th:text="${user.id}">ID</span></span>
+        <span class="profile-id" th:if="${user.hasRole(T(ru.sfedu.blog.entity.UserRoleEnum).ADMIN)}">Админ</span>
     </div>
     <div class="profile-actions">
         <form th:action="@{/auth/logout}" method="post">
