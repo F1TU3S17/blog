@@ -40,6 +40,7 @@ class BlogHttpIntegrationTest {
         jdbc.update("DELETE FROM spring_session_attributes");
         jdbc.update("DELETE FROM spring_session");
         jdbc.update("DELETE FROM comments");
+        jdbc.update("DELETE FROM post_likes");
         jdbc.update("DELETE FROM posts");
         jdbc.update("DELETE FROM users");
     }
@@ -158,7 +159,7 @@ class BlogHttpIntegrationTest {
         assertEquals(200, guest.get("/auth/register").statusCode());
         TestResponse feed = guest.get("/posts");
         assertEquals(200, feed.statusCode());
-        assertTrue(feed.body().contains("Автор: <span>alice</span>"));
+        assertTrue(Pattern.compile("Автор:\\s*<span>alice</span>").matcher(feed.body()).find());
         assertEquals(200, guest.get("/posts/" + id).statusCode());
         assertEquals(403, guest.get("/posts/create").statusCode());
     }
@@ -442,11 +443,61 @@ class BlogHttpIntegrationTest {
         assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM comments WHERE id = ?", Integer.class, commentId));
     }
 
+    @Test
+    void likePost_authenticatedUser_persistsLikeForUserAndPost() throws Exception {
+        Browser owner = new Browser();
+        owner.register("alice", "alice@example.com", "secret123");
+        owner.createPost("Post", "Body");
+        long postId = jdbc.queryForObject("SELECT id FROM posts", Long.class);
+        Browser liker = new Browser();
+        liker.register("bob", "bob@example.com", "secret123");
+
+        TestResponse response = liker.likePost(postId);
+
+        assertEquals(302, response.statusCode());
+        assertEquals("/posts/" + postId, response.location());
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM post_likes l JOIN users u ON u.id = l.user_id WHERE l.post_id = ? AND u.username = ?", Integer.class, postId, "bob"));
+    }
+
+    @Test
+    void deleteLike_authenticatedUser_removesOnlyTheirLike() throws Exception {
+        Browser owner = new Browser();
+        owner.register("alice", "alice@example.com", "secret123");
+        owner.createPost("Post", "Body");
+        long postId = jdbc.queryForObject("SELECT id FROM posts", Long.class);
+        Browser other = new Browser();
+        other.register("bob", "bob@example.com", "secret123");
+        assertEquals(302, owner.likePost(postId).statusCode());
+        assertEquals(302, other.likePost(postId).statusCode());
+
+        TestResponse response = owner.deleteLike(postId);
+
+        assertEquals(302, response.statusCode());
+        assertEquals("/posts/" + postId, response.location());
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM post_likes WHERE post_id = ?", Integer.class, postId));
+        assertEquals("bob", jdbc.queryForObject("SELECT u.username FROM post_likes l JOIN users u ON u.id = l.user_id WHERE l.post_id = ?", String.class, postId));
+    }
+
+    @Test
+    void likeEndpoints_anonymousUser_areForbiddenAndDoNotChangeLikes() throws Exception {
+        Browser owner = new Browser();
+        owner.register("alice", "alice@example.com", "secret123");
+        owner.createPost("Post", "Body");
+        long postId = jdbc.queryForObject("SELECT id FROM posts", Long.class);
+        assertEquals(302, owner.likePost(postId).statusCode());
+        Browser guest = new Browser();
+
+        assertEquals(403, guest.likePost(postId).statusCode());
+        assertEquals(403, guest.deleteLike(postId).statusCode());
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM post_likes WHERE post_id = ?", Integer.class, postId));
+    }
+
     private record TestResponse(int statusCode, String body, String location) {}
 
     private class Browser {
         private final Map<String, Cookie> cookies = new HashMap<>();
         private final Pattern csrf = Pattern.compile("name=\"_csrf\"\\s+value=\"([^\"]+)\"");
+        private final Pattern csrfData = Pattern.compile("data-csrf-token=\"([^\"]+)\"");
 
         TestResponse get(String path) throws Exception {
             return perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(path));
@@ -472,16 +523,28 @@ class BlogHttpIntegrationTest {
             return submit("DELETE", "/comments/" + commentId, "/posts/create", Map.of());
         }
 
+        TestResponse likePost(long postId) throws Exception {
+            return submit("POST", "/posts/" + postId + "/like", "/posts/" + postId, Map.of());
+        }
+
+        TestResponse deleteLike(long postId) throws Exception {
+            return submit("DELETE", "/posts/" + postId + "/like", "/posts/" + postId, Map.of());
+        }
+
         TestResponse submit(String method, String path, String formPage, Map<String, String> fields) throws Exception {
-            Matcher matcher = csrf.matcher(get(formPage).body());
-            assertTrue(matcher.find(), "CSRF token missing on " + formPage);
+            String page = get(formPage).body();
+            Matcher matcher = csrf.matcher(page);
+            if (!matcher.find()) {
+                matcher = csrfData.matcher(page);
+                assertTrue(matcher.find(), "CSRF token missing on " + formPage);
+            }
             MockHttpServletRequestBuilder request = switch (method) {
                 case "POST" -> post(path);
                 case "PUT" -> put(path);
                 case "DELETE" -> delete(path);
                 default -> throw new IllegalArgumentException(method);
             };
-            request.contentType("application/x-www-form-urlencoded").header("X-CSRF-TOKEN", matcher.group(1));
+            request.contentType("application/x-www-form-urlencoded").header("X-CSRF-TOKEN", matcher.group(1)).header("Referer", formPage);
             fields.forEach(request::param);
             return perform(request);
         }

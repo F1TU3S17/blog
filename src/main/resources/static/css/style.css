@@ -80,6 +80,10 @@ textarea { min-height: 200px; resize: vertical; }
 .detail-card > p:not(.eyebrow), .detail-card small { color: var(--muted); font-size: 13px; }
 hr { border: 0; border-top: 1px solid var(--line); margin: 22px 0; }
 .post-content { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.75; }
+.like-button { min-height: 36px; margin-top: 16px; padding: 6px 10px; gap: 7px; border-color: var(--line); background: transparent; color: var(--muted); }
+.like-button:hover, .like-button.is-liked { background: var(--surface-hover); color: var(--blue); }
+.like-button.is-liked svg { fill: currentColor; }
+.like-button:disabled { opacity: .5; cursor: wait; }
 .actions { margin-top: 28px; }
 .actions button + button { background: var(--surface); color: var(--blue); }
 .actions button + button:hover { background: var(--surface-hover); }

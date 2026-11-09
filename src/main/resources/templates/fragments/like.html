@@ -1,0 +1,8 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="button(post, user)">
+    <button type="button" class="like-button"
+            th:classappend="${post.currentUserHasLike} ? 'is-liked' : ''"
+            th:attr="data-like-url=@{/posts/{id}/like(id=${post.id})},data-login-url=@{/auth/login},data-authenticated=${user != null},aria-pressed=${post.currentUserHasLike},aria-label=${post.currentUserHasLike} ? 'Убрать лайк' : 'Поставить лайк'">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        <span th:text="${post.likesCount}">0</span>
+    </button>
+</div>

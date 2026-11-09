@@ -1,5 +1,6 @@
 package ru.sfedu.blog.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +14,12 @@ import ru.sfedu.blog.dto.PostCreationRequest;
 import ru.sfedu.blog.dto.PostResponse;
 import ru.sfedu.blog.dto.PostUpdateRequest;
 import ru.sfedu.blog.dto.PostWithCommentsResponse;
+import ru.sfedu.blog.entity.Post;
+import ru.sfedu.blog.entity.User;
+import ru.sfedu.blog.repository.PostRepositoryImplt;
+import ru.sfedu.blog.repository.UserRepositoryImplt;
 import ru.sfedu.blog.security.CustomUserDetails;
+import ru.sfedu.blog.service.LikeService;
 import ru.sfedu.blog.service.PostService;
 
 @Controller
@@ -21,6 +27,10 @@ import ru.sfedu.blog.service.PostService;
 @RequiredArgsConstructor
 public class PostController {
     private final PostService postService;
+    private final LikeService likeService;
+
+    private final PostRepositoryImplt postRepository;
+    private final UserRepositoryImplt userRepository;
 
     @GetMapping
     public String getLapePostsPage(
@@ -34,7 +44,7 @@ public class PostController {
             CustomUserDetails user,
             Model model
     ) {
-        Page<PostResponse> posts = postService.getPosts(pageable);
+        Page<PostResponse> posts = postService.getPosts(pageable, getUserId(user));
 
         model.addAttribute("user", user);
         model.addAttribute("posts", posts);
@@ -47,7 +57,7 @@ public class PostController {
             Model model,
             @PathVariable("id") Long id
     ) {
-        PostWithCommentsResponse post = postService.getPostById(id);
+        PostWithCommentsResponse post = postService.getPostById(id, getUserId(user));
         model.addAttribute("post", post);
         model.addAttribute("user", user);
 
@@ -92,5 +102,38 @@ public class PostController {
         return "redirect:/posts";
     }
 
+    @PostMapping("/{id}/like")
+    public String likePost(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            HttpServletRequest request
+    ) {
+        User user = userRepository.getById(currentUser.getId());
+        Post post = postRepository.getById(id);
+
+        likeService.addLike(user, post);
+
+        String referer = request.getHeader("Referer");
+        return "redirect:" + referer;
+    }
+
+    @DeleteMapping("/{id}/like")
+    public String deletePost(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            HttpServletRequest request
+    ) {
+        User user = userRepository.getById(currentUser.getId());
+        Post post = postRepository.getById(id);
+
+        likeService.deleteLikeByUserAndPost(user, post);
+
+        String referer = request.getHeader("Referer");
+        return "redirect:" + referer;
+    }
+
+    private Long getUserId(CustomUserDetails user) {
+        return user != null ? user.getId() : null;
+    }
 
 }

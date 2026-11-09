@@ -33,6 +33,8 @@
         Содержимое поста
     </div>
 
+    <div th:replace="~{fragments/like :: button(${post}, ${user})}"></div>
+
     <div class="actions"
          th:if="${user != null}">
 
@@ -127,6 +129,7 @@
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 <script th:src="@{/js/date.js}" defer></script>
 <script th:src="@{/js/post.js}" defer></script>
+<script th:src="@{/js/like.js}" defer></script>
 
 </body>
 </html>

@@ -34,6 +34,9 @@ public class Post {
     @OneToMany(mappedBy="post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostLike> postLikes = new ArrayList<>();
+
     @Column(nullable = false)
     private Instant createdAt;
 
@@ -44,17 +47,25 @@ public class Post {
         this.createdAt = Instant.now();
     }
 
-    public PostResponse toDto() {
+
+    private boolean userHasLike(Long userId) {
+        return userId != null && postLikes.stream()
+                .anyMatch(pl -> pl.getUser().getId().equals(userId));
+    }
+
+    public PostResponse toDto(Long userId) {
         return new PostResponse(
                 id,
                 title,
                 content,
                 author.toDto(),
-                createdAt
+                postLikes.size(),
+                createdAt,
+                userHasLike(userId)
         );
     }
 
-    public PostWithCommentsResponse toDtoWithComments() {
+    public PostWithCommentsResponse toDtoWithComments(Long userId) {
         return new PostWithCommentsResponse(
                 id,
                 title,
@@ -63,7 +74,9 @@ public class Post {
                 createdAt,
                 comments.stream()
                         .map(Comment::toDto)
-                        .toList()
+                        .toList(),
+                postLikes.size(),
+                userHasLike(userId)
         );
     }
 }

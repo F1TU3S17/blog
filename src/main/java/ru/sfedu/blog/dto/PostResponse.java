@@ -7,6 +7,8 @@ public record PostResponse(
         String title,
         String content,
         UserResponse author,
-        Instant createdAt
+        int likesCount,
+        Instant createdAt,
+        boolean currentUserHasLike
 ) {
 }

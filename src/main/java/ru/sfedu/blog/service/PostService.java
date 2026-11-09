@@ -35,7 +35,6 @@ public class PostService {
 
         post = postRepository.save(post);
         log.info("Post with id: {} created", post.getId());
-
     }
 
     @Transactional
@@ -54,24 +53,22 @@ public class PostService {
         if (request.content() != null && !request.content().isEmpty()) {
             post.setContent(request.content());
         }
-
-        post.toDto();
     }
 
     @Transactional(readOnly = true)
-    public PostWithCommentsResponse getPostById(Long id) {
-        return postRepository.getById(id).toDtoWithComments();
+    public PostWithCommentsResponse getPostById(Long id, Long userId) {
+        return postRepository.getById(id).toDtoWithComments(userId);
     }
 
+
     @Transactional(readOnly = true)
-    public Page<PostResponse> getPosts(Pageable pageable) {
+    public Page<PostResponse> getPosts(Pageable pageable, Long userId) {
         return postRepository.getAll(pageable)
-                .map(Post::toDto);
+                .map(post -> post.toDto(userId));
     }
 
     public void delete(Long id, CustomUserDetails user) {
         Post post = postRepository.getById(id);
-
         if (!user.hasRole(UserRoleEnum.ADMIN) && !post.getAuthor().getId().equals(user.getId())) {
             log.warn("User with id: {}, can`t delete post with id; {}", user.getId(), id);
             throw new AppException(AppErrorEnum.USER_CANT_EDIT_POST);

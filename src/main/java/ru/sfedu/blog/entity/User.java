@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.blog.dto.UserResponse;
-import ru.sfedu.blog.dto.UserWithPostsResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,18 +49,6 @@ public class User {
                 email,
                 role,
                 passwordHash
-        );
-    }
-
-    public UserWithPostsResponse toDtoWithPosts() {
-        return new UserWithPostsResponse(
-                id,
-                username,
-                email,
-                role,
-                posts.stream()
-                        .map((Post::toDto))
-                        .toList()
         );
     }
 }

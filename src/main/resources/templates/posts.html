@@ -11,7 +11,7 @@
 <body th:attr="data-theme=${currentTheme}">
 
 <header th:replace="~{fragments/layout :: header}"></header>
-<main class="page feed-page">
+<main class="page feed-page" th:attr="data-csrf-token=${_csrf?.token},data-csrf-header=${_csrf?.headerName}">
 <div class="section-heading"><div><p class="eyebrow"><span></span> ИСТОРИИ И ИДЕИ</p><h1>Лента постов<span class="brand-dot">.</span></h1></div><p>Читайте то, что важно.</p></div>
 
 <div class="empty-state" th:if="${posts.isEmpty()}">
@@ -37,6 +37,7 @@
                 Читать пост <span aria-hidden="true">↗</span>
             </a>
         </p>
+        <div th:replace="~{fragments/like :: button(${post}, ${user})}"></div>
     </article>
 </div></div>
 
@@ -72,6 +73,7 @@
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 <script th:src="@{/js/date.js}" defer></script>
+<script th:src="@{/js/like.js}" defer></script>
 
 </body>
 </html>

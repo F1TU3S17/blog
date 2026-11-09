@@ -9,6 +9,8 @@ public record PostWithCommentsResponse(
         String content,
         UserResponse author,
         Instant createdAt,
-        List<CommentResponse> comments
+        List<CommentResponse> comments,
+        int likesCount,
+        boolean currentUserHasLike
 ) {
 }
