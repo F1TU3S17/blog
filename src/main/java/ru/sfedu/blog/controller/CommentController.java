@@ -1,8 +1,8 @@
 package ru.sfedu.blog.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -36,14 +36,11 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    public String deleteComment (
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteComment (
             @PathVariable("commentId") Long commentId,
-            @AuthenticationPrincipal CustomUserDetails user,
-            HttpServletRequest request
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-
         commentService.delete(commentId, user);
-        String referer = request.getHeader("Referer");
-        return "redirect:" + referer;
     }
 }

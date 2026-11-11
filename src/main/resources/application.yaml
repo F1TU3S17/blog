@@ -9,6 +9,10 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
 
   session:
     timeout: 30m
@@ -17,7 +21,7 @@ spring:
       table-name: SPRING_SESSION
 
 server:
-  port: 8181
+  port: 8888
   servlet:
       cookie:
         http-only: true

@@ -75,6 +75,5 @@ public class PostService {
         }
 
         postRepository.delete(post.getId());
-
     }
 }

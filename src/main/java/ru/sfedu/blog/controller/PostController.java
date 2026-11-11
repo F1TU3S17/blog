@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -93,13 +94,12 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public String deletePost(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePost(
             @AuthenticationPrincipal CustomUserDetails user,
             @PathVariable("id") Long id
     ) {
         postService.delete(id, user);
-
-        return "redirect:/posts";
     }
 
     @PostMapping("/{id}/like")
@@ -118,18 +118,15 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}/like")
-    public String deletePost(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLike(
             @PathVariable("id") Long id,
-            @AuthenticationPrincipal CustomUserDetails currentUser,
-            HttpServletRequest request
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
         User user = userRepository.getById(currentUser.getId());
         Post post = postRepository.getById(id);
 
         likeService.deleteLikeByUserAndPost(user, post);
-
-        String referer = request.getHeader("Referer");
-        return "redirect:" + referer;
     }
 
     private Long getUserId(CustomUserDetails user) {

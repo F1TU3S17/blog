@@ -1,0 +1,50 @@
+digraph ER {
+    graph [rankdir=LR, splines=ortho, nodesep=0.55, ranksep=1.15, bgcolor="white", pad=0.25, fontname="Arial"];
+    node [shape=plain, fontname="Arial", fontsize=11];
+    edge [color="#44546A", penwidth=1.4, fontname="Arial", fontsize=10, fontcolor="#44546A"];
+
+    users [label=<
+      <TABLE BORDER="1.4" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2F5597">
+        <TR><TD BGCOLOR="#2F5597" ALIGN="CENTER"><FONT COLOR="white" POINT-SIZE="13"><B>users</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#EAF0F8"><B>id</B> : BIGSERIAL <FONT COLOR="#7F7F7F">PK</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">username : VARCHAR(50) <FONT COLOR="#7F7F7F">UQ, NN</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">email : VARCHAR(100) <FONT COLOR="#7F7F7F">UQ, NN</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">password_hash : TEXT <FONT COLOR="#7F7F7F">NN</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">role : VARCHAR(20) <FONT COLOR="#7F7F7F">NN</FONT></TD></TR>
+      </TABLE>>];
+
+    posts [label=<
+      <TABLE BORDER="1.4" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2F5597">
+        <TR><TD BGCOLOR="#2F5597" ALIGN="CENTER"><FONT COLOR="white" POINT-SIZE="13"><B>posts</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#EAF0F8"><B>id</B> : BIGSERIAL <FONT COLOR="#7F7F7F">PK</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">title : VARCHAR(100) <FONT COLOR="#7F7F7F">NN</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">content : TEXT</TD></TR>
+        <TR><TD ALIGN="LEFT">author_id : BIGINT <FONT COLOR="#7F7F7F">FK, NN</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">created_at : TIMESTAMP <FONT COLOR="#7F7F7F">NN</FONT></TD></TR>
+      </TABLE>>];
+
+    comments [label=<
+      <TABLE BORDER="1.4" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2F5597">
+        <TR><TD BGCOLOR="#2F5597" ALIGN="CENTER"><FONT COLOR="white" POINT-SIZE="13"><B>comments</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#EAF0F8"><B>id</B> : BIGSERIAL <FONT COLOR="#7F7F7F">PK</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">text : VARCHAR(1000) <FONT COLOR="#7F7F7F">NN</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">created_at : TIMESTAMP <FONT COLOR="#7F7F7F">NN</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">post_id : BIGINT <FONT COLOR="#7F7F7F">FK, NN</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">author_id : BIGINT <FONT COLOR="#7F7F7F">FK, NN</FONT></TD></TR>
+      </TABLE>>];
+
+    post_likes [label=<
+      <TABLE BORDER="1.4" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2F5597">
+        <TR><TD BGCOLOR="#2F5597" ALIGN="CENTER"><FONT COLOR="white" POINT-SIZE="13"><B>post_likes</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#EAF0F8"><B>id</B> : BIGSERIAL <FONT COLOR="#7F7F7F">PK</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">post_id : BIGINT <FONT COLOR="#7F7F7F">FK, NN</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">user_id : BIGINT <FONT COLOR="#7F7F7F">FK, NN</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">created_at : TIMESTAMP <FONT COLOR="#7F7F7F">NN</FONT></TD></TR>
+      </TABLE>>];
+
+    users -> posts [label="1 : N", arrowhead=crow, arrowtail=none, dir=both];
+    users -> comments [label="1 : N", arrowhead=crow, arrowtail=none, dir=both];
+    posts -> comments [label="1 : N", arrowhead=crow, arrowtail=none, dir=both];
+    posts -> post_likes [label="1 : N", arrowhead=crow, arrowtail=none, dir=both];
+    users -> post_likes [label="1 : N", arrowhead=crow, arrowtail=none, dir=both];
+}

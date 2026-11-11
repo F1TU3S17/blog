@@ -390,7 +390,7 @@ class BlogHttpIntegrationTest {
 
         TestResponse response = author.deleteComment(commentId);
 
-        assertEquals(302, response.statusCode());
+        assertEquals(204, response.statusCode());
         assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM comments WHERE id = ?", Integer.class, commentId));
         assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM comments WHERE text = 'Keep'", Integer.class));
     }
@@ -472,8 +472,7 @@ class BlogHttpIntegrationTest {
 
         TestResponse response = owner.deleteLike(postId);
 
-        assertEquals(302, response.statusCode());
-        assertEquals("/posts/" + postId, response.location());
+        assertEquals(204, response.statusCode());
         assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM post_likes WHERE post_id = ?", Integer.class, postId));
         assertEquals("bob", jdbc.queryForObject("SELECT u.username FROM post_likes l JOIN users u ON u.id = l.user_id WHERE l.post_id = ?", String.class, postId));
     }
